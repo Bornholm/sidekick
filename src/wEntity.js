@@ -8,8 +8,8 @@
 
 		S.with.Helpers.call(this);
 
-		this.update = function(deltaTime) {};
-		this.render = function(deltaTime) {};
+		!this.update && (this.update = function(deltaTime) {});
+		!this.render && (this.render = function(interpolation) {});
 
 		this.before('initialize', function() {
 			this.isVisible = true;
