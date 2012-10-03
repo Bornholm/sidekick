@@ -2,23 +2,27 @@
 <html>
   <head>
     <title>Basic</title>
-    <script type="text/javascript" src="../../src/entity.js"></script>
-    <script type="text/javascript" src="../../src/game.js"></script>
+
+    <!-- CreateJS -->
+    <script type="text/javascript" src="http://code.createjs.com/easeljs-0.5.0.min.js"></script>
+    
+    <!-- Sidekick soruces -->
+    <script type="text/javascript" src="../../src/wHelpers.js"></script>
+    <script type="text/javascript" src="../../src/wEntity.js"></script>
+    <script type="text/javascript" src="../../src/wGame.js"></script>
+    <script type="text/javascript" src="../../src/createjs/wCreateJsGame.js"></script>
+
+    <!--Basic Game -->
+    <script type="text/javascript" src="basicgame.js"></script>
+
   </head>
   <body>
    	<canvas id="canvas"></canvas>
    	<script type="text/javascript">
-   		(function() {
-
-   			var BasicGame = function() {
-
-   			};
-
-   			Sidekick.withGame.call(BasicGame.prototype);
-
-   			var game = new BasicGame();
-
-   		}());
+   	  (function() {
+        var game = new BasicGame('canvas');
+        game.render();
+      }());
    	</script>
   </body>
 </html>

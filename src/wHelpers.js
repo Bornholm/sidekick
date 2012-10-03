@@ -1,20 +1,16 @@
 (function() {
 
-	this.Sidekick = this.Sidekick || {};
-	
-	var withEntity,
-		push = Array.prototype.push;
+	var S = this.Sidekick = this.Sidekick || {};
 
+	S.with = S.with || {};
 
-	withEntity = function() {
+	var push = Array.prototype.push,
+		noop = function() {};
 
-		this.initialize = function() {};
-		this.update = function(deltaTime) {};
-		this.render = function(deltaTime) {};
-
+	withHelpers = function() {
 
 		this.before = function(methodName, func) {
-			var method = this[methodName];
+			var method = this[methodName] || noop;
 			this[methodName] = function() {
 				func.apply(this, arguments);
 				return method.apply(this, arguments);
@@ -22,7 +18,7 @@
 		};
 
 		this.after = function(methodName, func) {
-			var method = this[methodName];
+			var method = this[methodName] || noop;
 			this[methodName] = function() {
 				method.apply(this, arguments);
 				return func.apply(this, arguments);
@@ -30,8 +26,9 @@
 		};
 
 		this.wrap = function(methodName, wrapper) {
+			var method = this[methodName] || noop;
 			this[methodName] = function() {
-				var args = [this[methodName]];
+				var args = [method];
 				push.apply(args, arguments);
 				return wrapper.apply(this, args);
 			};
@@ -39,6 +36,6 @@
 
 	};
 
-	this.Sidekick.withEntity = withEntity;
+	S.with.Helpers = withHelpers;
 
 }());
