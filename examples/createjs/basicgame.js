@@ -2,6 +2,8 @@
 
 	var p;
 
+	// Basic Entity
+
 	var Circle = function() {
 		this.initialize.apply(this, arguments);
 	};
@@ -12,36 +14,45 @@
 		var g = this.graphics = new createjs.Graphics();
 		this.displayObject = new createjs.Shape(this.graphics);
 
+		this.x = Math.random()*500;
+		this.y = Math.random()*500;
+		this.xVelocity = (Math.random() > 0.5 ? -1 : 1)*Math.random()*0.2;
+		this.yVelocity = (Math.random() > 0.5 ? 1 : -1)*Math.random()*0.2;
+
+		this.draw();
+
+	};
+
+	p.draw = function() {
+
+		var g = this.graphics,
+			radius = Math.random()*10;
+
 		g.setStrokeStyle(1);
-		g.beginStroke(createjs.Graphics.getRGB(0,0,0));
-		g.beginFill(createjs.Graphics.getRGB(255,0,0));
-		g.drawCircle(0,0,3);
-
-		this.displayObject.cache(-3, -3, 6, 6);
-
-		this.displayObject.x = 10;
-		this.displayObject.y = 50;
-		this.xVelocity = 5;
-		this.yVelocity = 1;
+		g.beginFill(createjs.Graphics.getRGB((255*Math.random())>>0,(255*Math.random())>>0,(255*Math.random())>>0));
+		g.drawCircle(0,0,radius);
+		this.displayObject.cache(-radius, -radius, radius*2, radius*2);
 
 	};
 
 	p.update = function(t, dt) {
 
-		var dO = this.displayObject;
-	 	if(dO.x > 500) this.xVelocity = -0.1;
-	 	if(dO.x < 0) this.xVelocity = 0.1;
-	 	if(dO.y > 500) this.yVelocity = -0.1;
-	 	if(dO.y < 0) this.yVelocity = 0.1;
+	 	if( this.x <= 0 || this.x >= 500 ) this.xVelocity = -this.xVelocity;
+	 	if( this.y <= 0 || this.y >= 500 ) this.yVelocity = -this.yVelocity;
 
-	 	dO.x += dt * this.xVelocity;
-	 	dO.y += dt * this.yVelocity;
+	 	if(Math.random() > 0.95) {
+	 		this.xVelocity = (Math.random() > 0.5 ? -1 : 1)*Math.random()*0.2;
+			this.yVelocity = (Math.random() > 0.5 ? -1 : 1)*Math.random()*0.2;
+	 	}
+
+	 	this.x += dt * this.xVelocity;
+	 	this.y += dt * this.yVelocity;
 	};
 
 	p.render = function(interpolate) {
 		var dO = this.displayObject;
-		dO.x = dO.x + this.xVelocity * interpolate;
-		dO.y = dO.y + this.yVelocity * interpolate;
+		dO.x = this.x + this.xVelocity * interpolate;
+		dO.y = this.y + this.yVelocity * interpolate;
 	};
 
 	Sidekick.with.CreateJsEntity.call(p);
@@ -52,8 +63,11 @@
 
 	BasicGame = function() {
 		this.initialize.apply(this, arguments);
-
-		this.add(new Circle());
+		var count = 700;
+		while(count--)
+			this.add(new Circle());
+		createjs.Ticker.setFPS(60);
+		this.stage.autoClear = true;
 	};
 
 	p = BasicGame.prototype;

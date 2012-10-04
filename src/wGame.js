@@ -34,20 +34,18 @@
 		};
 
 		this.update = function(time, deltaTime) {
-			var i, len, curr,
+			var i, len,
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
-				curr = entities[i];
-				curr.isActive && curr.update(time, deltaTime);
+				entities[i].update(time, deltaTime);
 			}
 		};
 
 		this.render = function(interpolation) {
-			var i, len, curr,
+			var i, len,
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
-				curr = entities[i];
-				curr.isVisible && curr.render(interpolation);
+				entities[i].render(interpolation);
 			}
 		};
 
@@ -59,7 +57,6 @@
 
 			clock.lastCall = Date.now();
 			clock.accumulator += delta;
-
 
 			while( clock.accumulator >= clock.dt ) {
 				this.update(clock.t, clock.dt);
