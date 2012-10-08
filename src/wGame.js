@@ -6,7 +6,11 @@
 
 	var withGame = function() {
 
-		S.with.Helpers.call(this);
+		if( !S._require('Helpers', this) ) {
+			S.with.Helpers.call(this)
+		}
+
+		this._mark('Game');
 
 		this.before('initialize', function() {
 			this._entities = [];

@@ -6,7 +6,11 @@
 	
 	var withEntity = function() {
 
-		S.with.Helpers.call(this);
+		if( !S._require('Helpers', this) ) {
+			S.with.Helpers.call(this)
+		}
+
+		this._mark('Entity');
 
 		!this.update && (this.update = function(deltaTime) {});
 		!this.render && (this.render = function(interpolation) {});

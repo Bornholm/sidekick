@@ -2,12 +2,33 @@
 
 	var S = this.Sidekick = this.Sidekick || {};
 
+	S._require = function(mark, context) {
+		var i, len, curr,
+			marks = context._componentsMarks;
+		if(marks) {
+			for(i = 0, len = marks.length; i < len; ++i) {
+				curr = marks[i];
+				if(curr === mark) return true;
+			}
+		}
+		return false;
+	}
+
+}());(function() {
+
+	var S = this.Sidekick = this.Sidekick || {};
+
 	S.with = S.with || {};
 
 	var push = Array.prototype.push,
 		noop = function() {};
 
-	withHelpers = function() {
+	var withHelpers = function() {
+
+		this._mark = function(mark) {
+			var marks = this._componentsMarks = this._componentsMarks || [];
+			marks.push(mark);
+		};
 
 		this.before = function(methodName, func) {
 			var method = this[methodName] || noop;
@@ -34,6 +55,8 @@
 			};
 		};
 
+		this._mark('Helpers');
+
 	};
 
 	S.with.Helpers = withHelpers;
@@ -46,7 +69,11 @@
 	
 	var withEntity = function() {
 
-		S.with.Helpers.call(this);
+		if( !S._require('Helpers', this) ) {
+			S.with.Helpers.call(this)
+		}
+
+		this._mark('Entity');
 
 		!this.update && (this.update = function(deltaTime) {});
 		!this.render && (this.render = function(interpolation) {});
@@ -63,7 +90,11 @@
 
 	var withGame = function() {
 
-		S.with.Helpers.call(this);
+		if( !S._require('Helpers', this) ) {
+			S.with.Helpers.call(this)
+		}
+
+		this._mark('Game');
 
 		this.before('initialize', function() {
 			this._entities = [];
@@ -131,13 +162,95 @@
 	S.with.Game = withGame;
 
 }());(function() {
+
+	var S = this.Sidekick = this.Sidekick || {};
+
+	S.with = S.with || {};
+
+	var withStateBasedGame = function() {
+
+		if( !S._require('Game', this) ) {
+			S.with.Game.call(this)
+		}
+
+		this._mark('StateBasedGame');
+
+		this.before('initialize', function() {
+			this._currentStateName = 'default';
+			this._states = {
+				'default' : {
+					enter: function() {
+					},
+					exit: function(cb) {
+						cb();
+					}
+				}
+			};
+			this.setState('default');
+		});
+
+		this.addState = function(stateName, state) {
+			state.game = this;
+			this._states[stateName] = state;
+		};
+
+		this.removeState = function(stateName) {
+			delete this._states[stateName];
+		};
+
+		this.stateExists = function(stateName) {
+			return !!this._states[stateName];
+		};
+
+		this.isActualState = function(stateName) {
+			return this._states[stateName] === this._currentStateName;
+		};
+
+		this.setState = function(newStateName) {
+
+			var currentState,
+				self = this;
+
+			if( self.stateExists(newStateName) ) {
+				if( !self.isActualState(newStateName) ) {
+					currentState = this._states[this._currentState];
+					if(currentState) {
+						currentState.exit && currentState.exit( self._afterCurrentStateExit.bind(self, null, newStateName) );
+					} else {
+						self._afterCurrentStateExit(null, newStateName);
+					}
+				}
+			} else {
+				throw new Error('Unknown state '+newStateName+' !');
+			}
+		};
+
+		this._afterCurrentStateExit = function(err, newStateName) {
+			if(err) throw err;
+			var self = this,
+				newState = self._states[newStateName];
+			self._currentStateName = newStateName;
+			newState.enter && newState.enter();
+		};
+
+	};
+
+
+	S.with.StateBasedGame = withStateBasedGame;
+
+
+}());(function() {
 	
 	var S = this.Sidekick = this.Sidekick || {};
 	S.with = S.with || {};
 
 	var withCreateJsEntity = function() {
 
-		S.with.Entity.call(this);
+		if( !S._require('Entity', this) ) {
+			S.with.Entity.call(this)
+		}
+
+		this._mark('CreateJsEntity');
 
 	}
 
@@ -151,7 +264,11 @@
 
 	var withCreateJsGame = function() {
 
-		S.with.Game.call(this);
+		if( !S._require('Game', this) ) {
+			S.with.Game.call(this)
+		}
+
+		this._mark('CreateJsGame');
 
 		this.before('initialize', function(canvasOrId) {
 			this.stage = new createjs.Stage(canvasOrId)

@@ -7,7 +7,12 @@
 	var push = Array.prototype.push,
 		noop = function() {};
 
-	withHelpers = function() {
+	var withHelpers = function() {
+
+		this._mark = function(mark) {
+			var marks = this._componentsMarks = this._componentsMarks || [];
+			marks.push(mark);
+		};
 
 		this.before = function(methodName, func) {
 			var method = this[methodName] || noop;
@@ -33,6 +38,8 @@
 				return wrapper.apply(this, args);
 			};
 		};
+
+		this._mark('Helpers');
 
 	};
 

@@ -73,6 +73,7 @@
 	p = BasicGame.prototype;
 
 	Sidekick.with.CreateJsGame.call(p);
+	Sidekick.with.StateBasedGame.call(p);
 
 	this.BasicGame = BasicGame;
 

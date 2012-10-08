@@ -9,9 +9,11 @@ namespace('build', function() {
 
 	var build,
 		coreSources = [
+			'require',
 			'wHelpers',
 			'wEntity',
-			'wGame'
+			'wGame',
+			'wStateBasedGame'
 		],
 		createJsSources = [
 			'createjs/wCreateJsEntity',
@@ -63,6 +65,7 @@ task('minify', function() {
 		pro = uglify.uglify;
 
 	files.include('build/*.js');
+	files.exclude('build/*min.js');
 
 	files.toArray().forEach(function(f) {
 
@@ -75,8 +78,9 @@ task('minify', function() {
 
 		data = pro.gen_code(ast);
 
-		outputFile = f.slice(0, -3)+'-min.js',
+		outputFile = f.slice(0, -3)+'-min.js';
+
 		fs.writeFileSync(outputFile, data, 'utf-8');
-		
+
 	});
 });

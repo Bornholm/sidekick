@@ -6,7 +6,11 @@
 
 	var withCreateJsGame = function() {
 
-		S.with.Game.call(this);
+		if( !S._require('Game', this) ) {
+			S.with.Game.call(this)
+		}
+
+		this._mark('CreateJsGame');
 
 		this.before('initialize', function(canvasOrId) {
 			this.stage = new createjs.Stage(canvasOrId)

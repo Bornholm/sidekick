@@ -5,7 +5,11 @@
 
 	var withCreateJsEntity = function() {
 
-		S.with.Entity.call(this);
+		if( !S._require('Entity', this) ) {
+			S.with.Entity.call(this)
+		}
+
+		this._mark('CreateJsEntity');
 
 	}
 
