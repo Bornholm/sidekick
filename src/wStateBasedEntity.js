@@ -4,21 +4,21 @@
 
 	S.with = S.with || {};
 
-	var withStateBasedGame = function() {
+	var withStateBasedEntity = function() {
 
-		if( !S._require('Game', this) ) {
-			S.with.Game.call(this)
+		if( !S._require('Entity', this) ) {
+			S.with.Entity.call(this)
 		}
 
-		this._mark('StateBasedGame');
+		this._mark('StateBasedEntity');
 
 		this.before('initialize', function() {
 			this._currentStateName = 'default';
 			this._states = {
 				'default' : {
-					enter: function() {
+					enter: function(entity) {
 					},
-					exit: function(cb) {
+					exit: function(entity, cb) {
 						cb();
 					}
 				}
@@ -52,7 +52,7 @@
 				if( !self.isActualState(newStateName) ) {
 					currentState = this._states[this._currentState];
 					if(currentState) {
-						currentState.exit && currentState.exit( self._afterCurrentStateExit.bind(self, null, newStateName) );
+						currentState.exit && currentState.exit( self, self._afterCurrentStateExit.bind(self, null, newStateName) );
 					} else {
 						self._afterCurrentStateExit(null, newStateName);
 					}
@@ -67,13 +67,12 @@
 			var self = this,
 				newState = self._states[newStateName];
 			self._currentStateName = newStateName;
-			newState.enter && newState.enter();
+			newState.enter && newState.enter(self);
 		};
 
 	};
 
-
-	S.with.StateBasedGame = withStateBasedGame;
+	S.with.StateBasedEntity = withStateBasedEntity;
 
 
 }());

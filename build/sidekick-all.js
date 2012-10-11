@@ -90,8 +90,8 @@
 
 	var withGame = function() {
 
-		if( !S._require('Helpers', this) ) {
-			S.with.Helpers.call(this)
+		if( !S._require('Entity', this) ) {
+			S.with.Entity.call(this)
 		}
 
 		this._mark('Game');
@@ -100,17 +100,32 @@
 			this._entities = [];
 			this._clock = {
 				t: 0,
-				dt: 1000/60,
 				lastCall: Date.now(),
 				accumulator: 0
 			}
 		});
 
-		this.add = function(entity) {
+		this.getInterval = function() {
+			return 1/this._fps;
+		};
+
+		this.setInterval = function(interval) {
+			this._fps = 1/interval;
+		};
+
+		this.getFPS = function() {
+			return this._fps;
+		};
+
+		this.setFPS = function(fps) {
+			this._fps = fps;
+		};
+
+		this.addEntity = function(entity) {
 			this._entities.push(entity);
 		};
 
-		this.remove = function(entity) {
+		this.removeEntity = function(entity) {
 			var i, len, curr,
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
@@ -140,20 +155,22 @@
 		this.run = function(deltaTime) {
 			
 			var alpha,
-				clock = this._clock,
+				self = this,
+				clock = self._clock,
+				interval = self.getInterval() * 1000,
 				delta = Date.now() - clock.lastCall;
 
 			clock.lastCall = Date.now();
 			clock.accumulator += delta;
 
-			while( clock.accumulator >= clock.dt ) {
-				this.update(clock.t, clock.dt);
-				clock.t += clock.dt;
-				clock.accumulator -= clock.dt;
+			while( clock.accumulator >= interval ) {
+				self.update(clock.t, interval);
+				clock.t += interval;
+				clock.accumulator -= interval;
 			}
 
-			alpha = clock.accumulator / clock.dt;
-			this.render( alpha );
+			alpha = clock.accumulator / interval;
+			self.render( alpha );
 
 		}
 
@@ -167,21 +184,21 @@
 
 	S.with = S.with || {};
 
-	var withStateBasedGame = function() {
+	var withStateBasedEntity = function() {
 
-		if( !S._require('Game', this) ) {
-			S.with.Game.call(this)
+		if( !S._require('Entity', this) ) {
+			S.with.Entity.call(this)
 		}
 
-		this._mark('StateBasedGame');
+		this._mark('StateBasedEntity');
 
 		this.before('initialize', function() {
 			this._currentStateName = 'default';
 			this._states = {
 				'default' : {
-					enter: function() {
+					enter: function(entity) {
 					},
-					exit: function(cb) {
+					exit: function(entity, cb) {
 						cb();
 					}
 				}
@@ -215,7 +232,7 @@
 				if( !self.isActualState(newStateName) ) {
 					currentState = this._states[this._currentState];
 					if(currentState) {
-						currentState.exit && currentState.exit( self._afterCurrentStateExit.bind(self, null, newStateName) );
+						currentState.exit && currentState.exit( self, self._afterCurrentStateExit.bind(self, null, newStateName) );
 					} else {
 						self._afterCurrentStateExit(null, newStateName);
 					}
@@ -230,13 +247,12 @@
 			var self = this,
 				newState = self._states[newStateName];
 			self._currentStateName = newStateName;
-			newState.enter && newState.enter();
+			newState.enter && newState.enter(self);
 		};
 
 	};
 
-
-	S.with.StateBasedGame = withStateBasedGame;
+	S.with.StateBasedEntity = withStateBasedEntity;
 
 
 }());(function() {
@@ -274,12 +290,28 @@
 			this.stage = new createjs.Stage(canvasOrId)
 		});
 
-		this.after('add', function(entity) {
+		this.after('addEntity', function(entity) {
 			this.stage.addChild(entity.displayObject);
 		});
 
-		this.after('remove', function(entity) {
-			this.stage.removeChild(entity);
+		this.after('removeEntity', function(entity) {
+			this.stage.removeChild(entity.displayObject);
+		});
+
+		this.after('setInterval', function(interval) {
+			createjs.Ticker.setInterval(interval);
+		});
+
+		this.after('setFPS', function(fps) {
+			createjs.Ticker.setFPS(fps);
+		});
+
+		this.before('getFPS', function() {
+			this._fps = createjs.Ticker.getFPS();
+		});
+
+		this.before('getInterval', function() {
+			this._fps = createjs.Ticker.getFPS();
 		});
 
 		this.start = function() {

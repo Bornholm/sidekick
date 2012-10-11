@@ -13,7 +13,7 @@ namespace('build', function() {
 			'wHelpers',
 			'wEntity',
 			'wGame',
-			'wStateBasedGame'
+			'wStateBasedEntity'
 		],
 		createJsSources = [
 			'createjs/wCreateJsEntity',

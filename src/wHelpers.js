@@ -30,12 +30,12 @@
 			};
 		};
 
-		this.wrap = function(methodName, wrapper) {
+		this.wrap = function(methodName, func) {
 			var method = this[methodName] || noop;
 			this[methodName] = function() {
 				var args = [method];
 				push.apply(args, arguments);
-				return wrapper.apply(this, args);
+				return func.apply(this, args);
 			};
 		};
 

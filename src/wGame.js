@@ -6,8 +6,8 @@
 
 	var withGame = function() {
 
-		if( !S._require('Helpers', this) ) {
-			S.with.Helpers.call(this)
+		if( !S._require('Entity', this) ) {
+			S.with.Entity.call(this)
 		}
 
 		this._mark('Game');
@@ -16,17 +16,32 @@
 			this._entities = [];
 			this._clock = {
 				t: 0,
-				dt: 1000/60,
 				lastCall: Date.now(),
 				accumulator: 0
 			}
 		});
 
-		this.add = function(entity) {
+		this.getInterval = function() {
+			return 1/this._fps;
+		};
+
+		this.setInterval = function(interval) {
+			this._fps = 1/interval;
+		};
+
+		this.getFPS = function() {
+			return this._fps;
+		};
+
+		this.setFPS = function(fps) {
+			this._fps = fps;
+		};
+
+		this.addEntity = function(entity) {
 			this._entities.push(entity);
 		};
 
-		this.remove = function(entity) {
+		this.removeEntity = function(entity) {
 			var i, len, curr,
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
@@ -56,20 +71,22 @@
 		this.run = function(deltaTime) {
 			
 			var alpha,
-				clock = this._clock,
+				self = this,
+				clock = self._clock,
+				interval = self.getInterval() * 1000,
 				delta = Date.now() - clock.lastCall;
 
 			clock.lastCall = Date.now();
 			clock.accumulator += delta;
 
-			while( clock.accumulator >= clock.dt ) {
-				this.update(clock.t, clock.dt);
-				clock.t += clock.dt;
-				clock.accumulator -= clock.dt;
+			while( clock.accumulator >= interval ) {
+				self.update(clock.t, interval);
+				clock.t += interval;
+				clock.accumulator -= interval;
 			}
 
-			alpha = clock.accumulator / clock.dt;
-			this.render( alpha );
+			alpha = clock.accumulator / interval;
+			self.render( alpha );
 
 		}
 

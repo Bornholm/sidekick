@@ -16,12 +16,28 @@
 			this.stage = new createjs.Stage(canvasOrId)
 		});
 
-		this.after('add', function(entity) {
+		this.after('addEntity', function(entity) {
 			this.stage.addChild(entity.displayObject);
 		});
 
-		this.after('remove', function(entity) {
-			this.stage.removeChild(entity);
+		this.after('removeEntity', function(entity) {
+			this.stage.removeChild(entity.displayObject);
+		});
+
+		this.after('setInterval', function(interval) {
+			createjs.Ticker.setInterval(interval);
+		});
+
+		this.after('setFPS', function(fps) {
+			createjs.Ticker.setFPS(fps);
+		});
+
+		this.before('getFPS', function() {
+			this._fps = createjs.Ticker.getFPS();
+		});
+
+		this.before('getInterval', function() {
+			this._fps = createjs.Ticker.getFPS();
 		});
 
 		this.start = function() {
