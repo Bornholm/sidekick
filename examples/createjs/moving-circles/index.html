@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Basic CreateJS</title>
+    <title>Moving circles - CreateJS</title>
 
     <!-- CreateJS -->
     <script type="text/javascript" src="http://code.createjs.com/easeljs-0.5.0.min.js"></script>
     
-    <script type="text/javascript" src="../../build/sidekick-all.js"></script>
+    <script type="text/javascript" src="../../../build/sidekick-all.js"></script>
 
     <!--Basic Game -->
-    <script type="text/javascript" src="basicgame.js"></script>
+    <script type="text/javascript" src="game.js"></script>
 
   </head>
   <body>
@@ -17,9 +17,9 @@
    	<canvas id="canvas" width="500" height="500"></canvas>
    	<script type="text/javascript">
    	  (function() {
+        
         var game = new BasicGame('canvas');
         game.start();
-        //game.stop();
 
         var fps = document.getElementById('fps');
 
