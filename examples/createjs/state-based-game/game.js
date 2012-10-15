@@ -190,27 +190,47 @@
 		},
 
 		_initTitle: function() {
-			var g, s, title,
+			var g, s, 
+				title, uptitle, subtitle,
 				game = this.context,
 				stage = game.stage;
 
+			uptitle = new createjs.Text('The');
 			title = new createjs.Text('GRID');
+			subtitle = new createjs.Text('A fan game');
+			
+			uptitle.font = subtitle.font = "4px Abstract";
+
 			title.font = "36px Abstract";
-			title.color = '#113832';
+			title.lineHeight = 48;
+			title.outline = true;
 
+			subtitle.color = uptitle.color = title.color = '#259382';
+
+			this.uptitle = uptitle;
 			this.title = title;
+			this.subtitle = subtitle;
 
+			stage.addChild(uptitle);
 			stage.addChild(title);
+			stage.addChild(subtitle);
+			
 		},
 
 		_renderTitle: function() {
 
 			var title = this.title,
+				subtitle = this.subtitle,
+				uptitle = this.uptitle,
 				game = this.context,
 				stage = game.stage;
 
 			title.x = this.foregroundWidth/2 - title.getMeasuredWidth()/2;
 			title.y = (stage.canvas.height-this.foregroundHeight)/2 - title.getMeasuredHeight()/2;
+			uptitle.y = title.y - uptitle.getMeasuredHeight();
+			uptitle.x = title.x;
+			subtitle.x = title.x + title.getMeasuredWidth() - subtitle.getMeasuredWidth()*1.1;
+			subtitle.y = title.y + title.getMeasuredHeight();
 		}
 
 	};
