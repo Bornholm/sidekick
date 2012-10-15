@@ -41,7 +41,7 @@
 			this._initForeground();
 			this._initLines();
 			this._initPoints();
-			this._initTitle();
+			this._initTexts();
 		},
 
 		exit: function(callback) {
@@ -50,11 +50,12 @@
 
 		render: function(interpolate) {
 			this._renderLines(interpolate);
-			this._renderTitle();
+			this._renderTexts();
 		},
 
 		update: function(time, delta) {
 			this._updatePoints(delta);
+			this._blink(delta);
 		},
 
 		_updatePoints: function(delta) {
@@ -189,37 +190,42 @@
 
 		},
 
-		_initTitle: function() {
+		_initTexts: function() {
 			var g, s, 
-				title, uptitle, subtitle,
+				title, uptitle, subtitle, callAction,
 				game = this.context,
 				stage = game.stage;
 
+			callAction = new createjs.Text('Press [ENTER] to play');
 			uptitle = new createjs.Text('The');
 			title = new createjs.Text('GRID');
 			subtitle = new createjs.Text('A fan game');
 			
-			uptitle.font = subtitle.font = "4px Abstract";
+			callAction.font = uptitle.font = subtitle.font = "4px Abstract";
 
 			title.font = "36px Abstract";
 			title.lineHeight = 48;
 			title.outline = true;
 
+			callAction.color = '#ffffff';
 			subtitle.color = uptitle.color = title.color = '#259382';
 
 			this.uptitle = uptitle;
 			this.title = title;
 			this.subtitle = subtitle;
+			this.callAction = callAction;
 
 			stage.addChild(uptitle);
 			stage.addChild(title);
 			stage.addChild(subtitle);
+			stage.addChild(callAction);
 			
 		},
 
-		_renderTitle: function() {
+		_renderTexts: function() {
 
 			var title = this.title,
+				callAction = this.callAction,
 				subtitle = this.subtitle,
 				uptitle = this.uptitle,
 				game = this.context,
@@ -231,6 +237,18 @@
 			uptitle.x = title.x;
 			subtitle.x = title.x + title.getMeasuredWidth() - subtitle.getMeasuredWidth()*1.1;
 			subtitle.y = title.y + title.getMeasuredHeight();
+
+			callAction.x = this.foregroundWidth/2 - callAction.getMeasuredWidth()/2;
+			callAction.y = this.foregroundY - (title.y + title.getMeasuredHeight())/2;
+
+		},
+
+		_blink: function(delta) {
+			this._blinkAcc = (this._blinkAcc || 1) + delta;
+			if(this._blinkAcc > 800) {
+				this.callAction.visible = !this.callAction.visible;
+				this._blinkAcc = 0;
+			}
 		}
 
 	};

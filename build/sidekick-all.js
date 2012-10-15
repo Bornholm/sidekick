@@ -273,6 +273,8 @@
 
 		this._mark('CreateJsEntity');
 
+		this.displayObject = null;
+
 	}
 
 	S.with.CreateJsEntity = withCreateJsEntity;
@@ -286,7 +288,7 @@
 	var withCreateJsGame = function() {
 
 		if( !S._require('Game', this) ) {
-			S.with.Game.call(this)
+			S.with.Game.call(this);
 		}
 
 		this._mark('CreateJsGame');
