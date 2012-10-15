@@ -46,12 +46,12 @@
 			};
 		};
 
-		this.wrap = function(methodName, wrapper) {
+		this.wrap = function(methodName, func) {
 			var method = this[methodName] || noop;
 			this[methodName] = function() {
 				var args = [method];
 				push.apply(args, arguments);
-				return wrapper.apply(this, args);
+				return func.apply(this, args);
 			};
 		};
 
@@ -119,6 +119,10 @@
 
 		this.setFPS = function(fps) {
 			this._fps = fps;
+		};
+
+		this.clearEntities = function() {
+			this._entities.length = 0;
 		};
 
 		this.addEntity = function(entity) {
@@ -207,7 +211,8 @@
 		});
 
 		this.addState = function(stateName, state) {
-			state.game = this;
+			state = state || {};
+			state.context = this;
 			this._states[stateName] = state;
 		};
 
@@ -296,6 +301,10 @@
 
 		this.after('removeEntity', function(entity) {
 			this.stage.removeChild(entity.displayObject);
+		});
+
+		this.after('clearEntities', function() {
+			this.stage.removeAllChildren();
 		});
 
 		this.after('setInterval', function(interval) {

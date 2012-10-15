@@ -37,6 +37,10 @@
 			this._fps = fps;
 		};
 
+		this.clearEntities = function() {
+			this._entities.length = 0;
+		};
+
 		this.addEntity = function(entity) {
 			this._entities.push(entity);
 		};

@@ -24,6 +24,10 @@
 			this.stage.removeChild(entity.displayObject);
 		});
 
+		this.after('clearEntities', function() {
+			this.stage.removeAllChildren();
+		});
+
 		this.after('setInterval', function(interval) {
 			createjs.Ticker.setInterval(interval);
 		});

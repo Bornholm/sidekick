@@ -27,7 +27,8 @@
 		});
 
 		this.addState = function(stateName, state) {
-			state.game = this;
+			state = state || {};
+			state.context = this;
 			this._states[stateName] = state;
 		};
 
