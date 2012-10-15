@@ -11,6 +11,8 @@
 
 		this._mark('CreateJsEntity');
 
+		this.displayObject = null;
+
 	}
 
 	S.with.CreateJsEntity = withCreateJsEntity;

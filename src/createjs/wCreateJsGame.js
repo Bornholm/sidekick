@@ -7,7 +7,7 @@
 	var withCreateJsGame = function() {
 
 		if( !S._require('Game', this) ) {
-			S.with.Game.call(this)
+			S.with.Game.call(this);
 		}
 
 		this._mark('CreateJsGame');

@@ -3,21 +3,23 @@
 	/// Game
 
 	var StateBasedGame,
-		MenuState, GameState;
+		IntroState, GameState;
 
 	StateBasedGame = function() {
+
+		createjs.Ticker.useRAF = true;
 
 		this.initialize.apply(this, arguments);
 		this.setFPS(60);
 
-		this.addState('menu', MenuState);
+		this.addState('intro', IntroState);
 		this.addState('game', GameState);
 
-		this.setState('menu');
+		this.setState('intro');
 	};
 
 
-	MenuState = {
+	IntroState = {
 
 		enter: function() {
 
@@ -39,6 +41,7 @@
 			this._initForeground();
 			this._initLines();
 			this._initPoints();
+			this._initTitle();
 		},
 
 		exit: function(callback) {
@@ -46,7 +49,8 @@
 		},
 
 		render: function(interpolate) {
-			this._renderLines(0);
+			this._renderLines(interpolate);
+			this._renderTitle();
 		},
 
 		update: function(time, delta) {
@@ -124,6 +128,7 @@
 		},
 
 		_initLines: function() {
+
 			var g, s,
 				game = this.context,
 				stage = game.stage;
@@ -137,7 +142,6 @@
 
 			this.lines = s;
 			stage.addChild(s);
-
 
 		},
 
@@ -183,13 +187,35 @@
 
 			stage.addChild(s);
 
-		}
+		},
 
+		_initTitle: function() {
+			var g, s, title,
+				game = this.context,
+				stage = game.stage;
+
+			title = new createjs.Text('GRID');
+			title.font = "36px Abstract";
+			title.color = '#113832';
+
+			this.title = title;
+
+			stage.addChild(title);
+		},
+
+		_renderTitle: function() {
+
+			var title = this.title,
+				game = this.context,
+				stage = game.stage;
+
+			title.x = this.foregroundWidth/2 - title.getMeasuredWidth()/2;
+			title.y = (stage.canvas.height-this.foregroundHeight)/2 - title.getMeasuredHeight()/2;
+		}
 
 	};
 
-	Sidekick.with.Entity.call(MenuState);
-
+	Sidekick.with.Entity.call(IntroState);
 
 	p = StateBasedGame.prototype;
 
