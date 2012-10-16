@@ -9,16 +9,19 @@ namespace('build', function() {
 
 	var build,
 		coreSources = [
-			'require',
-			'wHelpers',
-			'wEntity',
-			'wGame',
-			'wStateBasedEntity',
-			'wStats'
+			'bootstrap',
+			'module',
+			'entity',
+			'mods/helpers',
+			'mods/entity',
+			'mods/game',
+			'mods/states',
+			'utils/stats'
 		],
 		createJsSources = [
-			'createjs/wCreateJsEntity',
-			'createjs/wCreateJsGame'
+			'spec/createjs/mods/entity',
+			'spec/createjs/mods/game',
+			'spec/createjs/ui/button'
 		];
 
 	build = function(output, sources) {

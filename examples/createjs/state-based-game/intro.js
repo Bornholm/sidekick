@@ -1,14 +1,18 @@
 (function() {
 
-	var IntroState = {
+	var IntroState = Sidekick.entity({
+
+		initialize: function() {
+			this.displayObject = new createjs.Container();
+		},
 
 		enter: function() {
 
 			var game = this.context;
 
-			this.foregroundHeight = game.stage.canvas.height*(1/3);
-			this.foregroundWidth =  game.stage.canvas.width;
-			this.foregroundY =  game.stage.canvas.height - this.foregroundHeight;
+			this.foregroundHeight = game.getHeight()*(1/3);
+			this.foregroundWidth =  game.getWidth();
+			this.foregroundY =  game.getHeight() - this.foregroundHeight;
 			this.speed = 0.001;
 			this.origin = [this.foregroundWidth/2, 0];
 			this.points = [];
@@ -20,29 +24,30 @@
 
 			this._initBackground();
 			this._initForeground();
-			this._initLines();
 			this._initPoints();
 			this._initTexts();
 
-			KeyboardJS.bind.key('enter', this._onEnter.bind(this));
+			this.keyBinding = KeyboardJS.bind.key('enter', this._onEnter.bind(this));
 		},
 
 		exit: function(callback) {
-			console.log('Exit !');
-			callback();
+			this._dispatchExit = callback;
+			this._transitionMode = true;
 		},
 
 		render: function(interpolate) {
-			this._renderLines(interpolate);
+			this._renderForeground(interpolate);
 			this._renderTexts();
 		},
 
 		update: function(time, delta) {
 			this._updatePoints(delta);
 			this._blink(delta);
+			this._doTransition();
 		},
 
 		_onEnter: function() {
+			this.keyBinding.clear();
 			this.context.setState('menu');
 		},
 
@@ -67,18 +72,23 @@
 			}
 		},
 
-		_renderLines: function(alpha) {
+		_renderForeground: function(alpha) {
 
 			var i, len, deltaX,
 				verticalLines = 9,
 				interpolation = this.speed * alpha,
-				g = this.lines.graphics,
+				g = this.foreground.graphics,
 				origin = this.origin,
 				leftAnchor = this.leftAnchor,
 				rightAnchor = this.rightAnchor,
 				points = this.points;
 
 			g.clear();
+
+			g.beginFill('#113832');
+			g.drawRect(0, 0, this.foregroundWidth, this.foregroundHeight);
+			g.endFill();
+			
 			g.beginStroke('#259382');
 
 			deltaX = this.foregroundWidth/verticalLines;
@@ -116,42 +126,24 @@
 
 		},
 
-		_initLines: function() {
-
-			var g, s,
-				game = this.context,
-				stage = game.stage;
-
-			g = new createjs.Graphics();
-			s = new createjs.Shape(g);
-
-			s.width = stage.canvas.width;
-			s.height = this.foregroundHeight;
-			s.y = this.foregroundY;
-
-			this.lines = s;
-			stage.addChild(s);
-
-		},
-
 		_initBackground: function() {
 
 			var g, s,
 				game = this.context,
-				stage = game.stage;
+				container = this.displayObject;
 
 			g = new createjs.Graphics();
 			s = new createjs.Shape(g);
 
-			s.width = stage.canvas.width;
-			s.height = stage.canvas.height;
+			s.width = game.getWidth();
+			s.height = game.getHeight();
 
 			g.beginFill('#000000');
 			g.drawRect(0, 0, s.width, s.height);
 
 			s.cache( 0, 0, s.width, s.height);			
 
-			stage.addChild(s);
+			container.addChild(s);
 
 		},
 
@@ -159,7 +151,7 @@
 
 			var g, s,
 				game = this.context,
-				stage = game.stage;
+				container = this.displayObject;
 
 			g = new createjs.Graphics();
 			s = new createjs.Shape(g);
@@ -167,14 +159,11 @@
 			s.width = this.foregroundWidth;
 			s.height = this.foregroundHeight;
 
-			g.beginFill('#113832');
-			g.drawRect(0, 0, s.width, s.height);
-
-			s.cache( 0, 0, s.width, s.height);
-
 			s.y = this.foregroundY;
 
-			stage.addChild(s);
+			this.foreground = s;
+
+			container.addChild(s);
 
 		},
 
@@ -182,7 +171,7 @@
 			var g, s, 
 				title, uptitle, subtitle, callAction,
 				game = this.context,
-				stage = game.stage;
+				container = this.displayObject;
 
 			callAction = new createjs.Text('Press [ENTER] to play');
 			uptitle = new createjs.Text('The');
@@ -203,10 +192,10 @@
 			this.subtitle = subtitle;
 			this.callAction = callAction;
 
-			stage.addChild(uptitle);
-			stage.addChild(title);
-			stage.addChild(subtitle);
-			stage.addChild(callAction);
+			container.addChild(uptitle);
+			container.addChild(title);
+			container.addChild(subtitle);
+			container.addChild(callAction);
 			
 		},
 
@@ -217,10 +206,10 @@
 				subtitle = this.subtitle,
 				uptitle = this.uptitle,
 				game = this.context,
-				stage = game.stage;
+				container = this.displayObject;
 
 			title.x = this.foregroundWidth/2 - title.getMeasuredWidth()/2;
-			title.y = (stage.canvas.height-this.foregroundHeight)/2 - title.getMeasuredHeight()/2;
+			title.y = (game.getHeight()-this.foregroundHeight)/2 - title.getMeasuredHeight()/2;
 			uptitle.y = title.y - uptitle.getMeasuredHeight();
 			uptitle.x = title.x;
 			subtitle.x = title.x + title.getMeasuredWidth() - subtitle.getMeasuredWidth()*1.1;
@@ -237,11 +226,32 @@
 				this.callAction.visible = !this.callAction.visible;
 				this._blinkAcc = 0;
 			}
+			if(this._transitionMode) {
+				this.callAction.visible = false;
+			}
+		},
+
+		_doTransition: function() {
+
+			if(this._transitionMode) {
+
+				var title = this.title,
+					foreground = this.foreground,
+					callAction = this.callAction,
+					subtitle = this.subtitle,
+					uptitle = this.uptitle;
+
+				foreground.alpha = uptitle.alpha = subtitle.alpha = callAction.alpha = title.alpha -= 0.02;
+				this.speed += 0.0005;
+
+				if(foreground.alpha <= 0) {
+					this._dispatchExit();
+				}
+
+			}
 		}
 
-	};
-
-	Sidekick.with.Entity.call(IntroState);
+	}, ['createjs:entity']);
 
 	this.StateBasedGame.IntroState = IntroState;
 

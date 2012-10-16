@@ -2,15 +2,11 @@
 	
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
-
 	var withGame = function() {
 
-		if( !S._require('Entity', this) ) {
-			S.with.Entity.call(this)
-		}
-
-		this._mark('Game');
+		!S.has('entity', this) && S.module('entity').call(this)
+		
+		S._mark('game', this);
 
 		this.before('initialize', function() {
 			this._entities = [];
@@ -96,6 +92,6 @@
 
 	};
 
-	S.with.Game = withGame;
+	S.module('game', withGame);
 
 }());

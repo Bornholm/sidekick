@@ -2,30 +2,28 @@
 	
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
 
 	var withCreateJsGame = function() {
 
-		if( !S._require('Game', this) ) {
-			S.with.Game.call(this);
-		}
+		!S.has('game', this) && S.module('game').call(this);
 
-		this._mark('CreateJsGame');
+		S._mark('createjs:game', this);
 
 		this.before('initialize', function(canvasOrId) {
-			this.stage = new createjs.Stage(canvasOrId)
+			createjs.Ticker.useRAF = true;
+			this._stage = new createjs.Stage(canvasOrId)
 		});
 
 		this.after('addEntity', function(entity) {
-			this.stage.addChild(entity.displayObject);
+			this._stage.addChild(entity.displayObject);
 		});
 
 		this.after('removeEntity', function(entity) {
-			this.stage.removeChild(entity.displayObject);
+			this._stage.removeChild(entity.displayObject);
 		});
 
 		this.after('clearEntities', function() {
-			this.stage.removeAllChildren();
+			this._stage.removeAllChildren();
 		});
 
 		this.after('setInterval', function(interval) {
@@ -60,12 +58,29 @@
 			this.run(deltaTime);
 		};
 
+		this.getWidth = function() {
+			return this._stage.canvas.width;
+		};
+
+		this.setWidth = function(w) {
+			this._stage.canvas.width = w;
+		};
+
+		this.getHeight = function() {
+			return this._stage.canvas.height;
+		};
+
+		this.setHeight = function(h) {
+			this._stage.canvas.height = h;
+		}
+
+
 		this.after('render', function() {
-			this.stage.update();
+			this._stage.update();
 		});
 
 	}
 
-	S.with.CreateJsGame = withCreateJsGame;
+	S.module('createjs:game', withCreateJsGame);
 
 }());

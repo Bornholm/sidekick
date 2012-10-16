@@ -14,20 +14,11 @@
 
   </head>
   <body>
-    <div id="fps">--fps</div>
    	<canvas id="canvas" width="500" height="500"></canvas>
    	<script type="text/javascript">
    	  (function() {
-        
         var game = new BasicGame('canvas');
         game.start();
-
-        var fps = document.getElementById('fps');
-
-        setInterval(function() {
-          fps.innerHTML = createjs.Ticker.getMeasuredFPS().toFixed(0)+'fps';
-        }, 1000);
-
       }());
    	</script>
   </body>

@@ -2,9 +2,9 @@
 
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S._require = function(mark, context) {
+	S.has = function(mark, context) {
 		var i, len, curr,
-			marks = context._componentsMarks;
+			marks = context._modulesMarks;
 		if(marks) {
 			for(i = 0, len = marks.length; i < len; ++i) {
 				curr = marks[i];
@@ -12,23 +12,70 @@
 			}
 		}
 		return false;
-	}
+	};
+
+	S._mark = function(mark, obj) {
+		var marks = obj._modulesMarks = obj._modulesMarks || [];
+		marks.push(mark);
+	};
+
+}());(function() {
+
+	var S = this.Sidekick = this.Sidekick || {},
+		modules = {};
+
+	S.module = function(name, module) {
+		if(arguments.length === 1) {
+			return modules[name]
+		} else if(arguments.length === 2) {
+			modules[name] = module;
+		}
+	};
 
 }());(function() {
 
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
+
+	var extend = function(src, dest) {
+		var key;
+		for (key in src) {
+			dest[key] = src[key];
+		}
+	};
+	
+	S.entity = function(src, modules) {
+
+		modules = modules || [];
+
+		var i, len, module,
+			e = function() {
+				this.initialize.apply(this, arguments);
+			},
+			p = e.prototype;
+
+		extend(src, p);
+
+		S.module('entity').call(p);
+
+		for(i = 0, len = modules.length; i < len; ++i) {
+			module = S.module(modules[i]);
+			if(module) {
+				module.call(p);
+			} else throw new Error('Module "'+modules[i]+'" is undefined !');
+		}
+
+		return e;
+	};
+
+}());(function() {
+
+	var S = this.Sidekick = this.Sidekick || {};
 
 	var push = Array.prototype.push,
 		noop = function() {};
 
 	var withHelpers = function() {
-
-		this._mark = function(mark) {
-			var marks = this._componentsMarks = this._componentsMarks || [];
-			marks.push(mark);
-		};
 
 		this.before = function(methodName, func) {
 			var method = this[methodName] || noop;
@@ -55,46 +102,39 @@
 			};
 		};
 
-		this._mark('Helpers');
+		S._mark('helpers', this);
 
 	};
 
-	S.with.Helpers = withHelpers;
+	S.module('helpers', withHelpers)
 
 }());(function() {
 
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
-	
 	var withEntity = function() {
 
-		if( !S._require('Helpers', this) ) {
-			S.with.Helpers.call(this)
-		}
+		!S.has('helpers', this) && S.module('helpers').call(this)
 
-		this._mark('Entity');
+		S._mark('entity', this);
 
+		!this.initialize && (this.initialize = function() {});
 		!this.update && (this.update = function(deltaTime) {});
 		!this.render && (this.render = function(interpolation) {});
 
 	};
 
-	S.with.Entity = withEntity;
+	S.module('entity', withEntity);
 
 }());(function() {
 	
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
-
 	var withGame = function() {
 
-		if( !S._require('Entity', this) ) {
-			S.with.Entity.call(this)
-		}
-
-		this._mark('Game');
+		!S.has('entity', this) && S.module('entity').call(this)
+		
+		S._mark('game', this);
 
 		this.before('initialize', function() {
 			this._entities = [];
@@ -180,21 +220,17 @@
 
 	};
 
-	S.with.Game = withGame;
+	S.module('game', withGame);
 
 }());(function() {
 
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
+	var withStates = function() {
 
-	var withStateBasedEntity = function() {
+		!S.has('helpers', this) && S.module('helpers').call(this)
 
-		if( !S._require('Entity', this) ) {
-			S.with.Entity.call(this)
-		}
-
-		this._mark('StateBasedEntity');
+		S._mark('states', this);
 
 		this.before('initialize', function() {
 			this._currentStateName = 'default';
@@ -257,8 +293,7 @@
 
 	};
 
-	S.with.StateBasedEntity = withStateBasedEntity;
-
+	S.module('states', withStates);
 
 }());(function() {
 
@@ -293,15 +328,11 @@
 	
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
-
 	var withStats = function() {
 
-		if( !S._require('Game', this) ) {
-			S.with.Game.call(this)
-		}
+		!S.has('game', this) && S.module('game').call(this)
 
-		this._mark('Stats');
+		S._mark('stats', this);
 
 		this.before('initialize', function() {
 			var stats = this._stats = new Stats();
@@ -318,7 +349,7 @@
 
 	};
 
-	S.with.Stats = withStats;
+	S.module('stats', withStats);
 
 
 }());(function() {
@@ -328,46 +359,42 @@
 
 	var withCreateJsEntity = function() {
 
-		if( !S._require('Entity', this) ) {
-			S.with.Entity.call(this)
-		}
+		!S.has('entity', this) && S.module('entity').call(this);
 
-		this._mark('CreateJsEntity');
+		S._mark('createjs:entity', this);
 
 		this.displayObject = null;
 
 	}
 
-	S.with.CreateJsEntity = withCreateJsEntity;
+	S.module('createjs:entity', withCreateJsEntity);
 	
 }());(function() {
 	
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
 
 	var withCreateJsGame = function() {
 
-		if( !S._require('Game', this) ) {
-			S.with.Game.call(this);
-		}
+		!S.has('game', this) && S.module('game').call(this);
 
-		this._mark('CreateJsGame');
+		S._mark('createjs:game', this);
 
 		this.before('initialize', function(canvasOrId) {
-			this.stage = new createjs.Stage(canvasOrId)
+			createjs.Ticker.useRAF = true;
+			this._stage = new createjs.Stage(canvasOrId)
 		});
 
 		this.after('addEntity', function(entity) {
-			this.stage.addChild(entity.displayObject);
+			this._stage.addChild(entity.displayObject);
 		});
 
 		this.after('removeEntity', function(entity) {
-			this.stage.removeChild(entity.displayObject);
+			this._stage.removeChild(entity.displayObject);
 		});
 
 		this.after('clearEntities', function() {
-			this.stage.removeAllChildren();
+			this._stage.removeAllChildren();
 		});
 
 		this.after('setInterval', function(interval) {
@@ -402,12 +429,43 @@
 			this.run(deltaTime);
 		};
 
+		this.getWidth = function() {
+			return this._stage.canvas.width;
+		};
+
+		this.setWidth = function(w) {
+			this._stage.canvas.width = w;
+		};
+
+		this.getHeight = function() {
+			return this._stage.canvas.height;
+		};
+
+		this.setHeight = function(h) {
+			this._stage.canvas.height = h;
+		}
+
+
 		this.after('render', function() {
-			this.stage.update();
+			this._stage.update();
 		});
 
 	}
 
-	S.with.CreateJsGame = withCreateJsGame;
+	S.module('createjs:game', withCreateJsGame);
+
+}());(function() {
+
+	var S = this.Sidekick = this.Sidekick || {};
+
+	var wButton = function() {
+
+		!S.has('entity', this) && S.module('entity').call(this);
+		!S.has('states', this) && S.module('states').call(this);
+		S._mark('createjs:button', this);
+
+	};
+
+	S.module('createjs:button', wButton);
 
 }());

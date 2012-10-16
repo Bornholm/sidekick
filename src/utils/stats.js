@@ -31,15 +31,11 @@
 	
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
-
 	var withStats = function() {
 
-		if( !S._require('Game', this) ) {
-			S.with.Game.call(this)
-		}
+		!S.has('game', this) && S.module('game').call(this)
 
-		this._mark('Stats');
+		S._mark('stats', this);
 
 		this.before('initialize', function() {
 			var stats = this._stats = new Stats();
@@ -56,7 +52,7 @@
 
 	};
 
-	S.with.Stats = withStats;
+	S.module('stats', withStats);
 
 
 }());

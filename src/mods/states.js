@@ -2,15 +2,11 @@
 
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
+	var withStates = function() {
 
-	var withStateBasedEntity = function() {
+		!S.has('helpers', this) && S.module('helpers').call(this)
 
-		if( !S._require('Entity', this) ) {
-			S.with.Entity.call(this)
-		}
-
-		this._mark('StateBasedEntity');
+		S._mark('states', this);
 
 		this.before('initialize', function() {
 			this._currentStateName = 'default';
@@ -73,7 +69,6 @@
 
 	};
 
-	S.with.StateBasedEntity = withStateBasedEntity;
-
+	S.module('states', withStates);
 
 }());

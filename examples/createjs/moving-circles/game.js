@@ -2,20 +2,16 @@
 
 	/// Game
 
-	var BasicGame, p;
+	var BasicGame = Sidekick.entity({
 
-	BasicGame = function() {
-		this.initialize.apply(this, arguments);
-		var count = 700;
-		while(count--)
-			this.addEntity(new Circle());
-		createjs.Ticker.setFPS(60);
-		this.stage.autoClear = true;
-	};
+		initialize: function() {
+			var count = 700;
+			while(count--)
+				this.addEntity(new Circle());
+			this.setFPS(60);
+		}
 
-	p = BasicGame.prototype;
-
-	Sidekick.with.CreateJsGame.call(p);
+	}, ['createjs:game', 'stats']);
 
 	this.BasicGame = BasicGame;
 

@@ -2,17 +2,10 @@
 
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
-
 	var push = Array.prototype.push,
 		noop = function() {};
 
 	var withHelpers = function() {
-
-		this._mark = function(mark) {
-			var marks = this._componentsMarks = this._componentsMarks || [];
-			marks.push(mark);
-		};
 
 		this.before = function(methodName, func) {
 			var method = this[methodName] || noop;
@@ -39,10 +32,10 @@
 			};
 		};
 
-		this._mark('Helpers');
+		S._mark('helpers', this);
 
 	};
 
-	S.with.Helpers = withHelpers;
+	S.module('helpers', withHelpers)
 
 }());

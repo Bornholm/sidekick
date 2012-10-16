@@ -2,21 +2,18 @@
 
 	var S = this.Sidekick = this.Sidekick || {};
 
-	S.with = S.with || {};
-	
 	var withEntity = function() {
 
-		if( !S._require('Helpers', this) ) {
-			S.with.Helpers.call(this)
-		}
+		!S.has('helpers', this) && S.module('helpers').call(this)
 
-		this._mark('Entity');
+		S._mark('entity', this);
 
+		!this.initialize && (this.initialize = function() {});
 		!this.update && (this.update = function(deltaTime) {});
 		!this.render && (this.render = function(interpolation) {});
 
 	};
 
-	S.with.Entity = withEntity;
+	S.module('entity', withEntity);
 
 }());

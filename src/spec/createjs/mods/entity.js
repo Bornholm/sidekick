@@ -5,16 +5,14 @@
 
 	var withCreateJsEntity = function() {
 
-		if( !S._require('Entity', this) ) {
-			S.with.Entity.call(this)
-		}
+		!S.has('entity', this) && S.module('entity').call(this);
 
-		this._mark('CreateJsEntity');
+		S._mark('createjs:entity', this);
 
 		this.displayObject = null;
 
 	}
 
-	S.with.CreateJsEntity = withCreateJsEntity;
+	S.module('createjs:entity', withCreateJsEntity);
 	
 }());

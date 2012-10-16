@@ -2,27 +2,20 @@
 
 	/// Game
 
-	var StateBasedGame;
+	var StateBasedGame = Sidekick.entity({
 
-	StateBasedGame = function() {
+		initialize: function() {
 
-		createjs.Ticker.useRAF = true;
+			this.setFPS(60);
 
-		this.initialize.apply(this, arguments);
-		this.setFPS(60);
+			this.addState('intro', new StateBasedGame.IntroState() );
+			this.addState('menu',  new StateBasedGame.MenuState() );
+			//this.addState('game',  StateBasedGame.GameState);
 
-		this.addState('intro', StateBasedGame.IntroState);
-		this.addState('menu',  StateBasedGame.MenuState);
-		this.addState('game',  StateBasedGame.GameState);
+			this.setState('intro');
+		}
 
-		this.setState('intro');
-	};
-	
-	p = StateBasedGame.prototype;
-
-	Sidekick.with.CreateJsGame.call(p);
-	Sidekick.with.StateBasedEntity.call(p);
-	Sidekick.with.Stats.call(p);
+	}, ['createjs:game', 'states', 'stats']);
 
 	this.StateBasedGame = StateBasedGame;
 
