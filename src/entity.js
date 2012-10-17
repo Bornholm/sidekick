@@ -4,20 +4,23 @@
 
 
 	var extend = function(src, dest) {
-		var key;
-		for (key in src) {
-			dest[key] = src[key];
-		}
-	};
+			var key;
+			for (key in src) {
+				dest[key] = src[key];
+			}
+		},
+		getEntity = function() {
+			return function Entity() {
+				this.initialize.apply(this, arguments);
+			};
+		};
 	
 	S.entity = function(src, modules) {
 
 		modules = modules || [];
 
 		var i, len, module,
-			e = function() {
-				this.initialize.apply(this, arguments);
-			},
+			e = getEntity();
 			p = e.prototype;
 
 		extend(src, p);

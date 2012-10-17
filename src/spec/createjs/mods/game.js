@@ -16,10 +16,12 @@
 
 		this.after('addEntity', function(entity) {
 			this._stage.addChild(entity.displayObject);
+			entity.onEntityAdd && entity.onEntityAdd();
 		});
 
 		this.after('removeEntity', function(entity) {
 			this._stage.removeChild(entity.displayObject);
+			entity.onEntityRemove && entity.onEntityRemove();
 		});
 
 		this.after('clearEntities', function() {
@@ -72,6 +74,11 @@
 
 		this.setHeight = function(h) {
 			this._stage.canvas.height = h;
+		};
+
+
+		this.getStage = function() {
+			return this._stage;
 		}
 
 

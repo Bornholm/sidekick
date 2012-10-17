@@ -1,7 +1,6 @@
 (function() {
 	
 	var S = this.Sidekick = this.Sidekick || {};
-	S.with = S.with || {};
 
 	var withCreateJsEntity = function() {
 
@@ -9,7 +8,8 @@
 
 		S._mark('createjs:entity', this);
 
-		this.displayObject = null;
+		!this.onEntityAdd && (this.onEntityAdd = function() {});
+		!this.onEntityRemove && (this.onEntityRemove = function() {});
 
 	}
 

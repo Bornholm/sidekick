@@ -38,6 +38,7 @@
 		};
 
 		this.addEntity = function(entity) {
+			entity.game = this;
 			this._entities.push(entity);
 		};
 
@@ -46,6 +47,7 @@
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
 				if(entities[i] === entity) {
+					delete entity.game;
 					entities.splice(i, 1);
 					return;
 				}

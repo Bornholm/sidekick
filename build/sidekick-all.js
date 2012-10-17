@@ -38,20 +38,23 @@
 
 
 	var extend = function(src, dest) {
-		var key;
-		for (key in src) {
-			dest[key] = src[key];
-		}
-	};
+			var key;
+			for (key in src) {
+				dest[key] = src[key];
+			}
+		},
+		getEntity = function() {
+			return function Entity() {
+				this.initialize.apply(this, arguments);
+			};
+		};
 	
 	S.entity = function(src, modules) {
 
 		modules = modules || [];
 
 		var i, len, module,
-			e = function() {
-				this.initialize.apply(this, arguments);
-			},
+			e = getEntity();
 			p = e.prototype;
 
 		extend(src, p);
@@ -166,6 +169,7 @@
 		};
 
 		this.addEntity = function(entity) {
+			entity.game = this;
 			this._entities.push(entity);
 		};
 
@@ -174,6 +178,7 @@
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
 				if(entities[i] === entity) {
+					delete entity.game;
 					entities.splice(i, 1);
 					return;
 				}
@@ -246,8 +251,16 @@
 			this.setState('default');
 		});
 
+		this.getCurrentState = function() {
+			return this._states[this._currentStateName];
+		};
+
+		this.getCurrentStateName = function() {
+			return this._currentStateName;
+		};
+
 		this.addState = function(stateName, state) {
-			if(!state) throw new Error('Cannot add '+state+' as a state !');
+			state = state || {};
 			state.context = this;
 			this._states[stateName] = state;
 		};
@@ -260,20 +273,22 @@
 			return !!this._states[stateName];
 		};
 
-		this.isActualState = function(stateName) {
+		this.isCurrentState = function(stateName) {
 			return this._states[stateName] === this._currentStateName;
 		};
 
 		this.setState = function(newStateName) {
 
+			console.log('Enter State:', newStateName);
+
 			var currentState,
 				self = this;
 
 			if( self.stateExists(newStateName) ) {
-				if( !self.isActualState(newStateName) ) {
+				if( !self.isCurrentState(newStateName) ) {
 					currentState = this._states[this._currentStateName];
-					if(currentState) {
-						currentState.exit && currentState.exit( self._afterCurrentStateExit.bind(self, newStateName) );
+					if(currentState && currentState.exit) {
+						currentState.exit( self._afterCurrentStateExit.bind(self, newStateName) );
 					} else {
 						self._afterCurrentStateExit(newStateName);
 					}
@@ -282,6 +297,10 @@
 				throw new Error('Unknown state '+newStateName+' !');
 			}
 		};
+
+		this.getState = function(stateName) {
+			return this._states[stateName];
+		}
 
 		this._afterCurrentStateExit = function(newStateName, err) {
 			if(err) throw err;
@@ -363,7 +382,8 @@
 
 		S._mark('createjs:entity', this);
 
-		this.displayObject = null;
+		!this.onEntityAdd && (this.onEntityAdd = function() {});
+		!this.onEntityRemove && (this.onEntityRemove = function() {});
 
 	}
 
@@ -387,10 +407,12 @@
 
 		this.after('addEntity', function(entity) {
 			this._stage.addChild(entity.displayObject);
+			entity.onEntityAdd && entity.onEntityAdd();
 		});
 
 		this.after('removeEntity', function(entity) {
 			this._stage.removeChild(entity.displayObject);
+			entity.onEntityRemove && entity.onEntityRemove();
 		});
 
 		this.after('clearEntities', function() {
@@ -443,6 +465,11 @@
 
 		this.setHeight = function(h) {
 			this._stage.canvas.height = h;
+		};
+
+
+		this.getStage = function() {
+			return this._stage;
 		}
 
 
@@ -460,8 +487,60 @@
 
 	var wButton = function() {
 
-		!S.has('entity', this) && S.module('entity').call(this);
-		!S.has('states', this) && S.module('states').call(this);
+
+		this.wrap('initialize', function(sup) {
+
+			this.addState('normal');
+			this.addState('hover');
+			this.addState('active');
+			this.addState('disabled');	
+
+			sup.apply(this, arguments);
+
+			this.configureMouseHandlers();
+			this.setState('normal');
+
+		});
+
+		this.after('onEntityAdd', function() {
+			this.game.getStage().enableMouseOver();
+		});
+
+		this.configureMouseHandlers = function() {
+
+			var dO = this.displayObject,
+				self = this,
+				onMouseUp = function() { if(self.getCurrentStateName() !== 'normal') self.setState('hover') },
+				backToNormal = function() { self.setState('normal'); };
+				
+			if(!dO) throw new Error('createjs:button must have a displayObject property !');
+
+
+			dO.onMouseOver = function() { self.setState('hover') };
+
+			dO.onPress = function() {
+				self.setState('active');
+			};
+
+			dO.onMouseOut = backToNormal;
+
+			dO.onPress = function(evt) {
+				self.setState('active');
+				evt.onMouseUp = onMouseUp;
+			};
+
+		};
+
+		this.onClick = function(cb) {
+			this.displayObject.onClick = cb;
+		};
+
+		this.onDoubleClick = function(cb) {
+			this.displayObject.onDoubleClick = cb;
+		};	
+
+		!S.has('createjs:entity', this) && S.module('createjs:entity').call(this);
+		!S.has('states', this) && S.module('states').call(this);	
 		S._mark('createjs:button', this);
 
 	};

@@ -22,8 +22,16 @@
 			this.setState('default');
 		});
 
+		this.getCurrentState = function() {
+			return this._states[this._currentStateName];
+		};
+
+		this.getCurrentStateName = function() {
+			return this._currentStateName;
+		};
+
 		this.addState = function(stateName, state) {
-			if(!state) throw new Error('Cannot add '+state+' as a state !');
+			state = state || {};
 			state.context = this;
 			this._states[stateName] = state;
 		};
@@ -36,20 +44,22 @@
 			return !!this._states[stateName];
 		};
 
-		this.isActualState = function(stateName) {
+		this.isCurrentState = function(stateName) {
 			return this._states[stateName] === this._currentStateName;
 		};
 
 		this.setState = function(newStateName) {
 
+			console.log('Enter State:', newStateName);
+
 			var currentState,
 				self = this;
 
 			if( self.stateExists(newStateName) ) {
-				if( !self.isActualState(newStateName) ) {
+				if( !self.isCurrentState(newStateName) ) {
 					currentState = this._states[this._currentStateName];
-					if(currentState) {
-						currentState.exit && currentState.exit( self._afterCurrentStateExit.bind(self, newStateName) );
+					if(currentState && currentState.exit) {
+						currentState.exit( self._afterCurrentStateExit.bind(self, newStateName) );
 					} else {
 						self._afterCurrentStateExit(newStateName);
 					}
@@ -57,6 +67,10 @@
 			} else {
 				throw new Error('Unknown state '+newStateName+' !');
 			}
+		};
+
+		this.getState = function(stateName) {
+			return this._states[stateName];
 		};
 
 		this._afterCurrentStateExit = function(newStateName, err) {
