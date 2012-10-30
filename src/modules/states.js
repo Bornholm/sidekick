@@ -69,6 +69,10 @@
 			}
 		};
 
+		this.getStates = function() {
+			return this._states;
+		};
+
 		this.getState = function(stateName) {
 			return this._states[stateName];
 		};

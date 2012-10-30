@@ -1,5 +1,9 @@
 (function() {
 
+	var ASSETS = [
+
+	];
+
 	var IntroState = Sidekick.entity({
 
 		initialize: function() {
@@ -26,8 +30,8 @@
 			this._initForeground();
 			this._initPoints();
 			this._initTexts();
+			this._initCallToAction();
 
-			this.keyBinding = KeyboardJS.bind.key('enter', this._onEnter.bind(this));
 		},
 
 		exit: function(callback) {
@@ -42,7 +46,7 @@
 
 		update: function(time, delta) {
 			this._updatePoints(delta);
-			this._blink(delta);
+			if(this.callAction) this._blink(delta);
 			this._doTransition();
 		},
 
@@ -169,34 +173,47 @@
 
 		_initTexts: function() {
 			var g, s, 
-				title, uptitle, subtitle, callAction,
+				title, uptitle, subtitle,
 				game = this.context,
 				container = this.displayObject;
 
-			callAction = new createjs.Text('Press [ENTER] to play');
 			uptitle = new createjs.Text('The');
 			title = new createjs.Text('GRID');
 			subtitle = new createjs.Text('A fan game');
 			
-			callAction.font = uptitle.font = subtitle.font = "4px Abstract";
+			uptitle.font = subtitle.font = "4px Abstract";
 
 			title.font = "36px Abstract";
 			title.lineHeight = 48;
 			title.outline = true;
 
-			callAction.color = '#ffffff';
 			subtitle.color = uptitle.color = title.color = '#259382';
 
 			this.uptitle = uptitle;
 			this.title = title;
 			this.subtitle = subtitle;
-			this.callAction = callAction;
 
 			container.addChild(uptitle);
 			container.addChild(title);
 			container.addChild(subtitle);
-			container.addChild(callAction);
 			
+		},
+
+		_initCallToAction: function() {
+
+			var g, s, callAction,
+				game = this.context,
+				container = this.displayObject;
+
+			callAction = new createjs.Text('Press [ENTER] to play');
+
+			callAction.font = "4px Abstract";
+			callAction.color = '#ffffff';
+
+			this.callAction = callAction;
+			container.addChild(callAction);
+
+			this.keyBinding = KeyboardJS.bind.key('enter', this._onEnter.bind(this));
 		},
 
 		_renderTexts: function() {
@@ -215,8 +232,10 @@
 			subtitle.x = title.x + title.getMeasuredWidth() - subtitle.getMeasuredWidth()*1.1;
 			subtitle.y = title.y + title.getMeasuredHeight();
 
-			callAction.x = this.foregroundWidth/2 - callAction.getMeasuredWidth()/2;
-			callAction.y = this.foregroundY - (title.y + title.getMeasuredHeight())/2;
+			if(callAction) {
+				callAction.x = this.foregroundWidth/2 - callAction.getMeasuredWidth()/2;
+				callAction.y = this.foregroundY - (title.y + title.getMeasuredHeight())/2;
+			}
 
 		},
 
@@ -253,6 +272,6 @@
 
 	}, ['createjs:entity']);
 
-	this.StateBasedGame.IntroState = IntroState;
+	this.Grid.IntroState = IntroState;
 
 }());

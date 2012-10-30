@@ -12,16 +12,16 @@ namespace('build', function() {
 			'bootstrap',
 			'module',
 			'entity',
-			'mods/helpers',
-			'mods/entity',
-			'mods/game',
-			'mods/states',
+			'modules/helpers',
+			'modules/entity',
+			'modules/game',
+			'modules/states',
 			'utils/stats'
 		],
 		createJsSources = [
-			'spec/createjs/mods/entity',
-			'spec/createjs/mods/game',
-			'spec/createjs/ui/button'
+			'engines/createjs/modules/entity',
+			'engines/createjs/modules/game',
+			'engines/createjs/ui/button'
 		];
 
 	build = function(output, sources) {

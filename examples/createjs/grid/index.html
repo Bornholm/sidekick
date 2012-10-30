@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>StateBasedGame - CreateJS</title>
+    <title>Grid - CreateJS</title>
 
     <!-- Style -->
     <link href="style.css" rel="stylesheet" type="text/css">
@@ -10,24 +10,26 @@
     <script type="text/javascript" src="http://code.createjs.com/easeljs-0.5.0.min.js"></script>
     <script type="text/javascript" src="http://code.createjs.com/preloadjs-0.2.0.min.js"></script>
 
-    <!-- Libs -->
+    <!-- Other Libs -->
     <script type="text/javascript" src="./libs/keyboard.0.2.2.min.js"></script>
     
     <!-- Sidekick -->
-    <script type="text/javascript" src="../../../build/sidekick-all.js"></script>
+    <script type="text/javascript" src="./libs/sidekick-all.js"></script>
 
-    <!--StateBasedGame Game -->
-    <script type="text/javascript" src="game.js"></script>
-    <script type="text/javascript" src="intro.js"></script>
-    <script type="text/javascript" src="menu.js"></script>
+    <!--Grid Game -->
+    <script type="text/javascript" src="grid.js"></script>
+    <script type="text/javascript" src="states/load.js"></script>
+    <script type="text/javascript" src="states/intro.js"></script>
+    <script type="text/javascript" src="states/menu.js"></script>
+    <script type="text/javascript" src="states/game.js"></script>
 
   </head>
   <body>
    	<canvas id="canvas" width="640" height="480"></canvas>
    	<script type="text/javascript">
    	  (function() {
-        var game = new StateBasedGame('canvas');
-        game.start();
+        var grid = new Grid('canvas');
+        grid.start();
       }());
    	</script>
   </body>
