@@ -37,7 +37,8 @@
 				return loader.getResult(asset.id ? asset.id : asset.src ? asset.src : asset);
 			});
 
-			this.context.setState('intro');
+			//this.context.setState('intro');
+			this.context.setState('game');
 		},
 
 		_onLoadProgress: function(evt) {

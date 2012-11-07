@@ -132,10 +132,6 @@
 			this._initButtons();
 		},
 
-		exit: function() {
-			
-		},
-
 		_initBackground: function() {
 
 			var g, s,
@@ -174,10 +170,6 @@
 
 		onStartClick: function() {
 			this.context.setState('game');
-		},
-
-		exit: function() {
-			this.context.clearEntities();
 		}
 
 	}, ['createjs:entity']);
