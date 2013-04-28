@@ -5,9 +5,13 @@
 	var BasicGame = Sidekick.entity({
 
 		initialize: function() {
-			var count = 700;
-			while(count--)
-				this.addEntity(new Circle());
+			var count = 1000;
+			while(count--) {
+				var circle = new Circle();
+				this.addEntity(circle);
+				this.addChild(circle.displayObject);
+			}
+				
 			this.setFPS(60);
 		}
 

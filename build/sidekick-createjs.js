@@ -2,40 +2,22 @@
 
 	var S = this.Sidekick = this.Sidekick || {};
 
-
-	/** Module Utils **/
-
-	/** Check if a given Entity has already been extended by a given module **/
-	S.has = function(moduleMark, entity) {
+	S.has = function(mark, context) {
 		var i, len, curr,
-			marks = entity._modulesMarks;
+			marks = context._modulesMarks;
 		if(marks) {
 			for(i = 0, len = marks.length; i < len; ++i) {
 				curr = marks[i];
-				if(curr === moduleMark) return true;
+				if(curr === mark) return true;
 			}
 		}
 		return false;
 	};
 
-	/** "Mark" an given entity as extended by the given module **/
-	S._mark = function(moduleMark, entity) {
-		var marks = entity._modulesMarks = entity._modulesMarks || [];
-		marks.push(moduleMark);
+	S._mark = function(mark, obj) {
+		var marks = obj._modulesMarks = obj._modulesMarks || [];
+		marks.push(mark);
 	};
-
-
-	/** Events Binding **/
-
-	S.bindEvent = function bindEvent(element, type, handler) {
-	   if(element.addEventListener) {
-	      element.addEventListener(type, handler, false);
-	   }else{
-	      element.attachEvent('on'+type, handler);
-	   }
-	};
-
-
 
 }());(function() {
 
@@ -159,23 +141,19 @@
 
 		this.before('initialize', function() {
 			this._entities = [];
-			this._onAnimationFrameBinded = this._onAnimationFrame.bind(this);
-		});
-
-		this._resetClock = function() {
 			this._clock = {
 				t: 0,
-				lastCall: this.now(),
+				lastCall: Date.now(),
 				accumulator: 0
-			};
-		};
+			}
+		});
 
 		this.getInterval = function() {
-			return (1000/this._fps)|0;
+			return 1/this._fps;
 		};
 
 		this.setInterval = function(interval) {
-			this._fps = (1000/interval)|0;
+			this._fps = 1/interval;
 		};
 
 		this.getFPS = function() {
@@ -193,7 +171,6 @@
 		this.addEntity = function(entity) {
 			entity.game = this;
 			this._entities.push(entity);
-			entity.onEntityAdd && entity.onEntityAdd();
 		};
 
 		this.removeEntity = function(entity) {
@@ -201,7 +178,6 @@
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
 				if(entities[i] === entity) {
-					entity.onEntityRemove && entity.onEntityRemove();
 					delete entity.game;
 					entities.splice(i, 1);
 					return;
@@ -225,38 +201,16 @@
 			}
 		};
 
-		this.start = function() {
-			this._resetClock();
-			this._rafId = window.requestAnimationFrame(this._onAnimationFrameBinded);
-		};
-
-		this._onAnimationFrame = function() {
-			this.run();
-			window.requestAnimationFrame(this._onAnimationFrameBinded);
-		}
-
-		this.stop = function() {
-			window.cancelAnimationFrame(this._rafId);
-		};
-
-		this.now = (function() {
-			var performance = window.performance;
-			if(performance && performance.now) {
-				return performance.now.bind(performance);
-			} else {
-				return Date.now
-			}
-		}());
-
-		this.run = function() {
+		this.run = function(deltaTime) {
 			
 			var alpha,
 				self = this,
 				clock = self._clock,
-				interval = self.getInterval(),
-				delta = this.now() - clock.lastCall;
-
-			clock.lastCall = this.now();
+				interval = self.getInterval() * 1000,
+				now = Date.now(),
+				delta = now - clock.lastCall;
+				
+			clock.lastCall = now;
 			clock.accumulator += delta;
 
 			while( clock.accumulator >= interval ) {
@@ -267,7 +221,7 @@
 
 			alpha = clock.accumulator / interval;
 			self.render( alpha );
-
+			
 		}
 
 	};
@@ -367,45 +321,6 @@
 
 }());(function() {
 
-	var S = this.Sidekick = this.Sidekick || {};
-
-	var keys = {};
-
-	S.bindEvent(document, 'keydown', function(evt) {
-		var code = evt.key || evt.keyCode;
-			keyData = keys[code] = keys[code] || {};
-		keyData.down = true;
-		keyData.timestamp = Date.now();
-	});
-
-	S.bindEvent(document, 'keyup', function(evt) {
-		var code = evt.key || evt.keyCode;
-			keyData = keys[code] = keys[code] || {};
-		keyData.down = false;
-		keyData.timestamp = null;
-	});
-
-	var withKeyboard = function() {
-
-		!S.has('entity', this) && S.module('entity').call(this)
-		S._mark('keyboard', this);
-
-		this.isKeyDown = function(keyCode, withCtrl, withAlt) {
-			var key = keys[keyCode];
-			return key ? 
-				key.down && (withCtrl ? withCtrl : true) && (withAlt ? withAlt : true) : false;
-		};
-
-		this.keyDownSince = function(keyCode) {
-			return keys[keyCode] ? keys[keyCode].timestamp : false;
-		};
-		
-	};
-
-	S.module('keyboard', withKeyboard);
-
-}());(function() {
-
 	/*The MIT License
 
 	Copyright (c) 2009-2012 Mr.doob
@@ -462,33 +377,6 @@
 
 
 }());(function() {
-    var lastTime = 0,
-        vendors = ['ms', 'moz', 'webkit', 'o'],
-        x,
-        length,
-        currTime,
-        timeToCall;
-
-    for(x = 0, length = vendors.length; x < length && !window.requestAnimationFrame; ++x) {
-        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-        window.cancelAnimationFrame = 
-          window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
-    }
-
-    if (!window.requestAnimationFrame)
-        window.requestAnimationFrame = function(callback, element) {
-            currTime = new Date().getTime();
-            timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            lastTime = currTime + timeToCall;
-            return window.setTimeout(function() { callback(currTime + timeToCall); }, 
-              timeToCall);
-        };
-
-    if (!window.cancelAnimationFrame)
-        window.cancelAnimationFrame = function(id) {
-            clearTimeout(id);
-        };
-}());(function() {
 	
 	var S = this.Sidekick = this.Sidekick || {};
 
@@ -517,19 +405,54 @@
 		S._mark('createjs:game', this);
 
 		this.before('initialize', function(canvasOrId) {
+			createjs.Ticker.useRAF = true;
 			this._stage = new createjs.Stage(canvasOrId)
 		});
 
-		this.addChild = function(displayObject) {
-			this._stage.addChild(displayObject);
-		};
+		this.after('addEntity', function(entity) {
+			this._stage.addChild(entity.displayObject);
+			entity.onEntityAdd && entity.onEntityAdd();
+		});
 
-		this.removeChild = function(displayObject) {
-			this._stage.removeChild(displayObject);
-		};
+		this.after('removeEntity', function(entity) {
+			this._stage.removeChild(entity.displayObject);
+			entity.onEntityRemove && entity.onEntityRemove();
+		});
 
-		this.removeAllChildren = function() {
+		this.after('clearEntities', function() {
 			this._stage.removeAllChildren();
+		});
+
+		this.after('setInterval', function(interval) {
+			createjs.Ticker.setInterval(interval);
+		});
+
+		this.after('setFPS', function(fps) {
+			createjs.Ticker.setFPS(fps);
+		});
+
+		this.before('getFPS', function() {
+			this._fps = createjs.Ticker.getFPS();
+		});
+
+		this.before('getInterval', function() {
+			this._fps = createjs.Ticker.getFPS();
+		});
+
+		this.start = function() {
+			createjs.Ticker.addListener(this, true);
+		};
+
+		this.stop = function() {
+			createjs.Ticker.removeListener(this);
+		};
+
+		this.pause = function(paused) {
+			createjs.Ticker.setPaused(paused);
+		};
+
+		this.tick = function(deltaTime) {
+			this.run(deltaTime);
 		};
 
 		this.getWidth = function() {

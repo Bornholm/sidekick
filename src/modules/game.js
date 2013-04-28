@@ -10,19 +10,23 @@
 
 		this.before('initialize', function() {
 			this._entities = [];
-			this._clock = {
-				t: 0,
-				lastCall: Date.now(),
-				accumulator: 0
-			}
+			this._onAnimationFrameBinded = this._onAnimationFrame.bind(this);
 		});
 
+		this._resetClock = function() {
+			this._clock = {
+				t: 0,
+				lastCall: this.now(),
+				accumulator: 0
+			};
+		};
+
 		this.getInterval = function() {
-			return 1/this._fps;
+			return (1000/this._fps)|0;
 		};
 
 		this.setInterval = function(interval) {
-			this._fps = 1/interval;
+			this._fps = (1000/interval)|0;
 		};
 
 		this.getFPS = function() {
@@ -40,6 +44,7 @@
 		this.addEntity = function(entity) {
 			entity.game = this;
 			this._entities.push(entity);
+			entity.onEntityAdd && entity.onEntityAdd();
 		};
 
 		this.removeEntity = function(entity) {
@@ -47,6 +52,7 @@
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
 				if(entities[i] === entity) {
+					entity.onEntityRemove && entity.onEntityRemove();
 					delete entity.game;
 					entities.splice(i, 1);
 					return;
@@ -70,15 +76,38 @@
 			}
 		};
 
-		this.run = function(deltaTime) {
+		this.start = function() {
+			this._resetClock();
+			this._rafId = window.requestAnimationFrame(this._onAnimationFrameBinded);
+		};
+
+		this._onAnimationFrame = function() {
+			this.run();
+			window.requestAnimationFrame(this._onAnimationFrameBinded);
+		}
+
+		this.stop = function() {
+			window.cancelAnimationFrame(this._rafId);
+		};
+
+		this.now = (function() {
+			var performance = window.performance;
+			if(performance && performance.now) {
+				return performance.now.bind(performance);
+			} else {
+				return Date.now
+			}
+		}());
+
+		this.run = function() {
 			
 			var alpha,
 				self = this,
 				clock = self._clock,
-				interval = self.getInterval() * 1000,
-				delta = Date.now() - clock.lastCall;
+				interval = self.getInterval(),
+				delta = this.now() - clock.lastCall;
 
-			clock.lastCall = Date.now();
+			clock.lastCall = this.now();
 			clock.accumulator += delta;
 
 			while( clock.accumulator >= interval ) {

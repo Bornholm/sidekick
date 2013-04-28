@@ -2,8 +2,16 @@
 
 	var ASSETS = [
 		{ src: 'assets/fonts/abstract.ttf' },
-		{ src: 'assets/sprites/red_bike.png', id: 'red_bike' },
-		{ src: 'assets/sprites/red_bike.png', id: 'red_bike' }
+		{ 
+			src: 'assets/sprites/red_bike.png', 
+			id: 'red_bike', 
+			data: {
+				frames: {width: 16, height:32, regX: 8, regY: 32},
+				animations: {
+					idle: [0,15]
+				}
+			} 
+		}
 	];
 
 	var LoadState = Sidekick.entity({
@@ -21,6 +29,12 @@
 			loader.loadManifest(ASSETS);
 
 			this.context.addEntity(this);
+			this.context.addChild(this.displayObject);
+		},
+
+		exit: function(cb) {
+			this.context.removeAllChildren();
+			cb();
 		},
 
 		_onLoadError: function() {
@@ -33,12 +47,13 @@
 				loader = this.loader,
 				assets = game.assets = {};
 
-			game.assets = ASSETS.map(function(asset) {
-				return loader.getResult(asset.id ? asset.id : asset.src ? asset.src : asset);
+			ASSETS.forEach(function(asset) {
+				var id = asset.id ? asset.id : asset.src ? asset.src : asset.toString();
+				assets[id] = loader.getResult(id);
 			});
 
-			//this.context.setState('intro');
-			this.context.setState('game');
+			this.context.setState('intro');
+			//this.context.setState('game');
 		},
 
 		_onLoadProgress: function(evt) {

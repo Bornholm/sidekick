@@ -10,54 +10,19 @@
 		S._mark('createjs:game', this);
 
 		this.before('initialize', function(canvasOrId) {
-			createjs.Ticker.useRAF = true;
 			this._stage = new createjs.Stage(canvasOrId)
 		});
 
-		this.after('addEntity', function(entity) {
-			this._stage.addChild(entity.displayObject);
-			entity.onEntityAdd && entity.onEntityAdd();
-		});
+		this.addChild = function(displayObject) {
+			this._stage.addChild(displayObject);
+		};
 
-		this.after('removeEntity', function(entity) {
-			this._stage.removeChild(entity.displayObject);
-			entity.onEntityRemove && entity.onEntityRemove();
-		});
+		this.removeChild = function(displayObject) {
+			this._stage.removeChild(displayObject);
+		};
 
-		this.after('clearEntities', function() {
+		this.removeAllChildren = function() {
 			this._stage.removeAllChildren();
-		});
-
-		this.after('setInterval', function(interval) {
-			createjs.Ticker.setInterval(interval);
-		});
-
-		this.after('setFPS', function(fps) {
-			createjs.Ticker.setFPS(fps);
-		});
-
-		this.before('getFPS', function() {
-			this._fps = createjs.Ticker.getFPS();
-		});
-
-		this.before('getInterval', function() {
-			this._fps = createjs.Ticker.getFPS();
-		});
-
-		this.start = function() {
-			createjs.Ticker.addListener(this, true);
-		};
-
-		this.stop = function() {
-			createjs.Ticker.removeListener(this);
-		};
-
-		this.pause = function(paused) {
-			createjs.Ticker.setPaused(paused);
-		};
-
-		this.tick = function(deltaTime) {
-			this.run(deltaTime);
 		};
 
 		this.getWidth = function() {

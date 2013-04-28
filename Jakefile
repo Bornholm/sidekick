@@ -16,13 +16,19 @@ namespace('build', function() {
 			'modules/entity',
 			'modules/game',
 			'modules/states',
-			'utils/stats'
+			'modules/keyboard',
+			'utils/stats',
+			'utils/raf'
 		],
-		createJsSources = [
-			'engines/createjs/modules/entity',
-			'engines/createjs/modules/game',
-			'engines/createjs/ui/button'
-		];
+		enginesSources = {
+
+			'createjs': [
+				'engines/createjs/modules/entity',
+				'engines/createjs/modules/game',
+				'engines/createjs/ui/button'
+			]
+			
+		};
 
 	build = function(output, sources) {
 
@@ -43,21 +49,25 @@ namespace('build', function() {
 	task('all', function() {
 
 		var output = 'build/sidekick-all.js',
-			sources = coreSources.concat(createJsSources);
-
+			sources = coreSources;
+		for(var engine in enginesSources) {
+			sources.push.apply(sources, enginesSources[engine]);
+		};
 		build(output, sources);
-
 	});
 
-	desc('Build createJs sources');
-	task('createjs', function() {
+	for (var engine in enginesSources) {
+		desc('Build '+engine+' sources');
+		task(engine, function(eng) {
+			return function() {
+				var output = 'build/sidekick-'+eng+'.js',
+					sources = coreSources.concat(enginesSources[eng]);
+				build(output, sources);
+			}
+		}(engine));
+	}
 
-		var output = 'build/sidekick-createjs.js',
-			sources = coreSources.concat(createJsSources);
-
-		build(output, sources);
-
-	});
+	
 
 });
 

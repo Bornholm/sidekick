@@ -126,10 +126,17 @@
 		},
 
 		enter: function() {
+			this.context.removeAllChildren();
 			this.context.clearEntities();
 			this.context.addEntity(this);
+			this.context.addChild(this.displayObject);
 			this._initBackground();
 			this._initButtons();
+		},
+
+		exit: function(cb) {
+			this.context.removeAllChildren();
+			cb();
 		},
 
 		_initBackground: function() {
@@ -165,6 +172,7 @@
 			startButton.onClick(this.onStartClick.bind(this));
 
 			game.addEntity(startButton);
+			game.addChild(startButton.displayObject);
 			
 		},
 

@@ -25,6 +25,7 @@
 
 			game.clearEntities();
 			game.addEntity(this);
+			game.addChild(this.displayObject);
 
 			this._initBackground();
 			this._initForeground();
