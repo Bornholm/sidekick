@@ -19,8 +19,8 @@
 
 		});
 
-		this.after('onEntityAdd', function() {
-			this.game.getStage().enableMouseOver();
+		this.after('onEntityAdd', function(game) {
+			game.getStage().enableMouseOver();
 		});
 
 		this.configureMouseHandlers = function() {

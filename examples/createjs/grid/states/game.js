@@ -10,22 +10,25 @@
 			this._initBackground();
 		},
 
-		onEntityAdd: function() {
-			this._initCycleSpriteSheet();
-			this._initCycles();
+		onEntityAdd: function(game) {
+			this._gameSize = {
+				halfWidth: game.getWidth()/2,
+				halfHeight: game.getHeight()/2,
+			}
+			this._initCycleSpriteSheet(game.assets);
+			this._initCycles(game);
 			this._resetCyclePosition();
 		},
 
-		_initCycles: function() {
+		_initCycles: function(game) {
 			var cycle = new Cycle(this.cycleSpriteSheet);
-			this.game.addEntity(cycle);
+			game.addEntity(cycle);
 			this.displayObject.addChild(cycle.displayObject);
 			this.cycle = cycle;
 		},
 
-		_initCycleSpriteSheet: function() {
+		_initCycleSpriteSheet: function(assets) {
 			var data,
-				assets = this.game.assets,
 				bikeAsset = assets['red_bike'];
 			data = Object.create(bikeAsset.data);
 			data.images = [bikeAsset.result];
@@ -63,21 +66,14 @@
 
 		},
 
-		render: function() {
-			this.displayObject.x = this.x;
-			this.displayObject.y = this.y;
-		},
-
-
 		update: function(time, delta) {
 
-			var game = this.game,
-				cycle = this.cycle;
+			var cycle = this.cycle;
 
 			// Update camera position
 
-			this.x = game.getWidth()/2 - cycle.x;
-			this.y = game.getHeight()/2 - cycle.y;
+			this.x = this._gameSize.halfWidth - cycle.x;
+			this.y = this._gameSize.halfHeight - cycle.y;
 
 			// check collision
 			this._checkCollision();
@@ -97,7 +93,7 @@
 		}
 
 
-	}, ['createjs:entity']);
+	}, ['createjs:2d']);
 
 	var Cycle = Sidekick.entity({
 
@@ -172,7 +168,6 @@
 				level = new Level();
 
 			game.addEntity(level);
-			game.addChild(level.displayObject);
 
 			this.level = level;
 

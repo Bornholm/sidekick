@@ -9,8 +9,6 @@
 		S._mark('entity', this);
 
 		!this.initialize && (this.initialize = function() {});
-		!this.update && (this.update = function(deltaTime) {});
-		!this.render && (this.render = function(interpolation) {});
 
 	};
 

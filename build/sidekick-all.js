@@ -140,8 +140,6 @@
 		S._mark('entity', this);
 
 		!this.initialize && (this.initialize = function() {});
-		!this.update && (this.update = function(deltaTime) {});
-		!this.render && (this.render = function(interpolation) {});
 
 	};
 
@@ -191,9 +189,8 @@
 		};
 
 		this.addEntity = function(entity) {
-			entity.game = this;
 			this._entities.push(entity);
-			entity.onEntityAdd && entity.onEntityAdd();
+			entity.onEntityAdd && entity.onEntityAdd(this);
 		};
 
 		this.removeEntity = function(entity) {
@@ -201,8 +198,7 @@
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
 				if(entities[i] === entity) {
-					entity.onEntityRemove && entity.onEntityRemove();
-					delete entity.game;
+					entity.onEntityRemove && entity.onEntityRemove(this);
 					entities.splice(i, 1);
 					return;
 				}
@@ -213,7 +209,7 @@
 			var i, len,
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
-				entities[i].update(time, deltaTime);
+				entities[i].update && entities[i].update(time, deltaTime);
 			}
 		};
 
@@ -221,7 +217,7 @@
 			var i, len,
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
-				entities[i].render(interpolation);
+				entities[i].render && entities[i].render(interpolation);
 			}
 		};
 
@@ -563,6 +559,45 @@
 	S.module('createjs:game', withCreateJsGame);
 
 }());(function() {
+	
+	var S = this.Sidekick = this.Sidekick || {};
+
+	var withCreateJs2D = function() {
+
+		!S.has('createjs:entity', this) && S.module('createjs:entity').call(this);
+
+		S._mark('createjs:2d', this);
+
+		!this.onEntityAdd && (this.onEntityAdd = function() {});
+		!this.onEntityRemove && (this.onEntityRemove = function() {});
+
+		this.x = 0;
+		this.y = 0;
+
+		this.after('initialize', function() {
+			this.displayObject = this.displayObject || new createjs.DisplayObject();
+		});
+
+		this.after('onEntityAdd', function(game) {
+			game.addChild(this.displayObject);
+		});
+
+		this.after('onEntityRemove', function(game) {
+			game.removeChild(this.displayObject);
+		});
+
+		if(!this.render) {
+			this.render = function(alpha) {
+				this.displayObject.x = this.x;
+				this.displayObject.y = this.y;
+			}
+		}
+
+	}
+
+	S.module('createjs:2d', withCreateJs2D);
+	
+}());(function() {
 
 	var S = this.Sidekick = this.Sidekick || {};
 
@@ -583,8 +618,8 @@
 
 		});
 
-		this.after('onEntityAdd', function() {
-			this.game.getStage().enableMouseOver();
+		this.after('onEntityAdd', function(game) {
+			game.getStage().enableMouseOver();
 		});
 
 		this.configureMouseHandlers = function() {

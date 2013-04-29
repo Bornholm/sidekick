@@ -42,9 +42,8 @@
 		};
 
 		this.addEntity = function(entity) {
-			entity.game = this;
 			this._entities.push(entity);
-			entity.onEntityAdd && entity.onEntityAdd();
+			entity.onEntityAdd && entity.onEntityAdd(this);
 		};
 
 		this.removeEntity = function(entity) {
@@ -52,8 +51,7 @@
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
 				if(entities[i] === entity) {
-					entity.onEntityRemove && entity.onEntityRemove();
-					delete entity.game;
+					entity.onEntityRemove && entity.onEntityRemove(this);
 					entities.splice(i, 1);
 					return;
 				}
@@ -64,7 +62,7 @@
 			var i, len,
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
-				entities[i].update(time, deltaTime);
+				entities[i].update && entities[i].update(time, deltaTime);
 			}
 		};
 
@@ -72,7 +70,7 @@
 			var i, len,
 				entities = this._entities;
 			for(i = 0, len = entities.length; i < len; ++i) {
-				entities[i].render(interpolation);
+				entities[i].render && entities[i].render(interpolation);
 			}
 		};
 

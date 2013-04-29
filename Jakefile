@@ -25,6 +25,7 @@ namespace('build', function() {
 			'createjs': [
 				'engines/createjs/modules/entity',
 				'engines/createjs/modules/game',
+				'engines/createjs/modules/2d',
 				'engines/createjs/ui/button'
 			]
 			
